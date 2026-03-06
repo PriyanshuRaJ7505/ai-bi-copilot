@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# CORS allow for frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,9 +13,24 @@ app.add_middleware(
 )
 
 @app.get("/")
-def root():
-    return {"message": "AI BI Copilot running"}
-
-@app.get("/ui")
-def ui():
+def home():
     return FileResponse("index.html")
+
+
+@app.get("/predict")
+def predict(price: int, quantity: int):
+    revenue = price * quantity
+    return {
+        "price": price,
+        "quantity": quantity,
+        "predicted_revenue": revenue
+    }
+
+
+@app.get("/summary")
+def summary():
+    return {
+        "total_revenue": 20000,
+        "best_product": "Laptop",
+        "transactions": 15
+    }
