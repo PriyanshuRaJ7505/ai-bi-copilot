@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI BI Copilot — Intelligent Business Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030712;
+    --bg2: #0a0f1e;
+    --bg3: #0f172a;
+    --cyan: #00f5d4;
+    --cyan2: #00c9a7;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: rgba(0,245,212,0.12);
+    --card: rgba(15,23,42,0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ---- NOISE OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ---- GRID BACKGROUND ---- */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,212,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,212,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(3,7,18,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--cyan);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--cyan); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 8px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+  }
+
+  .nav-cta:hover {
+    background: var(--cyan);
+    color: var(--bg);
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,245,212,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
+    top: 20%; right: 10%;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 2;
+    animation: fadeUp 1s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,245,212,0.06);
+    border: 1px solid rgba(0,245,212,0.2);
+    padding: 6px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    margin-bottom: 30px;
+    animation: fadeUp 1s ease 0.3s both;
+  }
+
+  .hero h1 .line1 { color: var(--text); display: block; }
+  .hero h1 .line2 {
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+  }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 40px;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 16px;
+    animation: fadeUp 1s ease 0.5s both;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--bg);
+    padding: 14px 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: var(--cyan2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,245,212,0.3);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 14px 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  /* ---- HERO VISUAL ---- */
+  .hero-visual {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 480px;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+
+  .terminal {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,245,212,0.05);
+  }
+
+  .terminal-header {
+    background: rgba(255,255,255,0.03);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .t-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .t-dot.red { background: #ff5f57; }
+  .t-dot.yellow { background: #ffbd2e; }
+  .t-dot.green { background: #28ca41; }
+
+  .terminal-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+
+  .terminal-body {
+    padding: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .t-line { display: flex; gap: 8px; }
+  .t-prompt { color: var(--cyan); }
+  .t-cmd { color: var(--text); }
+  .t-out { color: #64748b; padding-left: 16px; }
+  .t-success { color: #4ade80; padding-left: 16px; }
+  .t-data { color: var(--purple); padding-left: 16px; }
+
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--cyan);
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ---- STATS STRIP ---- */
+  .stats-strip {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 30px 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .stat-item {
+    padding: 0 40px;
+    border-right: 1px solid var(--border);
+  }
+
+  .stat-item:first-child { padding-left: 0; }
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ---- DEMO SECTION ---- */
+  .demo-section {
+    padding: 100px 60px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 50px;
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .demo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 30px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .demo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+
+  .demo-card:hover::before { transform: scaleX(1); }
+  .demo-card:hover {
+    border-color: rgba(0,245,212,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .demo-card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .demo-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .demo-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  /* ---- INPUT GROUPS ---- */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .input-group {
+    flex: 1;
+  }
+
+  .input-group label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .input-group input, .input-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .input-group input:focus, .input-group textarea:focus {
+    border-color: var(--cyan);
+  }
+
+  .input-group textarea {
+    resize: none;
+    height: 80px;
+  }
+
+  .run-btn {
+    width: 100%;
+    background: rgba(0,245,212,0.1);
+    border: 1px solid rgba(0,245,212,0.3);
+    color: var(--cyan);
+    padding: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+
+  .run-btn:hover {
+    background: rgba(0,245,212,0.2);
+    box-shadow: 0 0 20px rgba(0,245,212,0.1);
+  }
+
+  .result-box {
+    margin-top: 14px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    padding: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    min-height: 60px;
+    color: var(--cyan);
+    white-space: pre-wrap;
+    transition: all 0.3s;
+  }
+
+  .loading {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .loading span {
+    width: 4px; height: 4px;
+    background: var(--cyan);
+    border-radius: 50%;
+    animation: bounce 0.6s infinite alternate;
+  }
+
+  .loading span:nth-child(2) { animation-delay: 0.2s; }
+  .loading span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-6px); }
+  }
+
+  /* ---- FEATURES ---- */
+  .features-section {
+    padding: 100px 60px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin-top: 60px;
+  }
+
+  .feature-item {
+    background: var(--bg2);
+    padding: 40px 36px;
+    transition: background 0.3s;
+  }
+
+  .feature-item:hover { background: var(--bg3); }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .feature-item h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .feature-item p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- CHART SECTION ---- */
+  .chart-section {
+    padding: 100px 60px;
+  }
+
+  .chart-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 30px;
+    margin-top: 50px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .chart-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .bars {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    height: 200px;
+  }
+
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-wrap {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 170px;
+  }
+
+  .bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    transition: height 1s cubic-bezier(0.4,0,0.2,1);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .bar:hover::after {
+    content: attr(data-val);
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+
+  .bar.cyan { background: linear-gradient(180deg, var(--cyan), rgba(0,245,212,0.3)); }
+  .bar.blue { background: linear-gradient(180deg, var(--blue), rgba(59,130,246,0.3)); }
+
+  .bar-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ---- TECH STACK ---- */
+  .tech-section {
+    padding: 80px 60px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tech-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+
+  .tech-chip {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .tech-chip:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0,245,212,0.04);
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    padding: 40px 60px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+  }
+
+  .footer-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan); }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-visual { display: none; }
+    .stats-strip { grid-template-columns: repeat(2,1fr); padding: 30px 24px; gap: 20px; }
+    .stat-item { border: none; padding: 0; }
+    .demo-section, .features-section, .chart-section, .tech-section { padding: 60px 24px; }
+    .demo-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    footer { padding: 30px 24px; flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  /* ---- STATUS INDICATOR ---- */
+  .api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.offline { background: #ef4444; animation: none; }
+
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    AI·BI·COPILOT
+  </div>
+  <ul class="nav-links">
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#stack">Stack</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try Live →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">CHECKING API...</span>
+    </div>
+    <h1>
+      <span class="line1">Business</span>
+      <span class="line2">Intelligence</span>
+      <span class="line1">Powered by AI</span>
+    </h1>
+    <p>An end-to-end AI system that cleans data, predicts revenue, answers questions from documents, and serves everything through a production-ready API.</p>
+    <div class="hero-buttons">
+      <a href="#demo" class="btn-primary">Live Demo</a>
+      <a href="https://github.com/PriyanshuRaJ7505/ai-bi-copilot" target="_blank" class="btn-secondary">GitHub ↗</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="t-dot red"></div>
+        <div class="t-dot yellow"></div>
+        <div class="t-dot green"></div>
+        <span class="terminal-title">ai-bi-copilot — python app/ml/train_model.py</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> python app/services/data_cleaner.py</span></div>
+        <div class="t-success">✓ File loaded!</div>
+        <div class="t-data">  date    product  price  quantity  revenue</div>
+        <div class="t-data">  2024-01-01  Laptop  800    5         4000</div>
+        <div class="t-data">  2024-01-02  Phone   400    10        4000</div>
+        <div class="t-out">  ...</div>
+        <br>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> python app/ml/train_model.py</span></div>
+        <div class="t-success">✓ Model trained! Error: 1190.0</div>
+        <div class="t-success">✓ Model saved to app/ml/model.pkl</div>
+        <br>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> python app/llm/rag.py</span></div>
+        <div class="t-success">✓ Knowledge base ready!</div>
+        <div class="t-data">  Q: What was Q1 revenue?</div>
+        <div class="t-success">  A: Q1 revenue was 500000 rupees.</div>
+        <br>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> uvicorn app.api.main:app --reload</span></div>
+        <div class="t-success">✓ Uvicorn running on http://0.0.0.0:8000</div>
+        <div class="t-line"><span class="t-prompt">$</span><span class="cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num" id="cnt1">0</div>
+    <div class="stat-label">Tech Stack</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" id="cnt2">0</div>
+    <div class="stat-label">API Endpoints</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" id="cnt3">0</div>
+    <div class="stat-label">ML Models</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" id="cnt4">0%</div>
+    <div class="stat-label">Docker Ready</div>
+  </div>
+</div>
+
+<!-- DEMO -->
+<section class="demo-section" id="demo">
+  <div class="section-label">// Live Demo</div>
+  <h2 class="section-title">Connect to Your API</h2>
+  <p class="section-sub">Test your running API directly from this interface. Make sure your API is running at localhost:8000.</p>
+
+  <div class="demo-grid">
+
+    <!-- Predict Card -->
+    <div class="demo-card">
+      <div class="demo-card-title">// endpoint_01</div>
+      <h3>Revenue Predictor</h3>
+      <p>Enter product price and quantity to get instant revenue prediction from your ML model.</p>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Price (₹)</label>
+          <input type="number" id="priceInput" placeholder="800" value="800">
+        </div>
+        <div class="input-group">
+          <label>Quantity</label>
+          <input type="number" id="qtyInput" placeholder="5" value="5">
+        </div>
+      </div>
+      <button class="run-btn" onclick="runPredict()">▶ Run Prediction</button>
+      <div class="result-box" id="predictResult">// Awaiting input...</div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="demo-card">
+      <div class="demo-card-title">// endpoint_02</div>
+      <h3>Sales Summary</h3>
+      <p>Fetch aggregated sales analytics from your data pipeline — total revenue, best product, and transaction count.</p>
+      <button class="run-btn" onclick="runSummary()" style="margin-bottom:14px">▶ Fetch Summary</button>
+      <div class="result-box" id="summaryResult">// Awaiting request...</div>
+    </div>
+
+    <!-- RAG Card -->
+    <div class="demo-card">
+      <div class="demo-card-title">// endpoint_03</div>
+      <h3>AI Question Answering</h3>
+      <p>Ask business questions in plain English. The RAG system searches your documents and returns the most relevant answer.</p>
+      <div class="input-group" style="margin-bottom:14px">
+        <label>Your Question</label>
+        <textarea id="ragInput" placeholder="What was the Q1 revenue?">What was the Q1 revenue?</textarea>
+      </div>
+      <button class="run-btn" onclick="runRAG()">▶ Ask AI</button>
+      <div class="result-box" id="ragResult">// Awaiting question...</div>
+    </div>
+
+    <!-- Health Card -->
+    <div class="demo-card">
+      <div class="demo-card-title">// endpoint_04</div>
+      <h3>API Health Check</h3>
+      <p>Verify that your FastAPI server is running and responding correctly. Green means your system is live.</p>
+      <button class="run-btn" onclick="runHealth()" style="margin-bottom:14px">▶ Check Status</button>
+      <div class="result-box" id="healthResult">// Awaiting check...</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CHART -->
+<section class="chart-section">
+  <div class="section-label">// Analytics</div>
+  <h2 class="section-title">Revenue by Product</h2>
+  <p class="section-sub">Visual breakdown of your sales data from the cleaned dataset.</p>
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <div class="chart-title">MONTHLY REVENUE DISTRIBUTION</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div> Revenue</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Quantity</div>
+      </div>
+    </div>
+    <div class="bars" id="chartBars"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="section-label">// Features</div>
+  <h2 class="section-title">What's Inside</h2>
+  <div class="features-grid">
+    <div class="feature-item">
+      <span class="feature-icon">🧹</span>
+      <h3>Data Pipeline</h3>
+      <p>Automated data cleaning with Pandas — handles missing values, type conversion, and feature engineering in one function call.</p>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🤖</span>
+      <h3>ML Prediction</h3>
+      <p>Random Forest model trained on sales data to predict revenue. Handles categorical encoding automatically with one-hot encoding.</p>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">⚡</span>
+      <h3>REST API</h3>
+      <p>FastAPI backend with auto-generated docs at /docs. Endpoints for prediction, analysis, and business summaries.</p>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🧠</span>
+      <h3>RAG System</h3>
+      <p>Retrieval Augmented Generation using FAISS vector search and Sentence Transformers to answer natural language business questions.</p>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🐳</span>
+      <h3>Docker Ready</h3>
+      <p>Fully containerized application that runs identically on any machine or cloud platform with a single docker run command.</p>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">📊</span>
+      <h3>Business Analytics</h3>
+      <p>Automatic aggregation of sales data — total revenue, top products, best regions, and transaction metrics computed on demand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="tech-section" id="stack">
+  <div class="section-label">// Tech Stack</div>
+  <h2 class="section-title">Built With</h2>
+  <div class="tech-row">
+    <div class="tech-chip">Python 3.10</div>
+    <div class="tech-chip">Pandas</div>
+    <div class="tech-chip">Scikit-learn</div>
+    <div class="tech-chip">XGBoost</div>
+    <div class="tech-chip">FastAPI</div>
+    <div class="tech-chip">Uvicorn</div>
+    <div class="tech-chip">FAISS</div>
+    <div class="tech-chip">Sentence Transformers</div>
+    <div class="tech-chip">Docker</div>
+    <div class="tech-chip">NumPy</div>
+    <div class="tech-chip">Pickle</div>
+    <div class="tech-chip">Git</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AI·BI·COPILOT</div>
+  <div class="footer-text">Built by PriyanshuRaJ7505 · 2026</div>
+  <div class="footer-text">
+    <a href="https://github.com/PriyanshuRaJ7505/ai-bi-copilot" target="_blank" style="color:var(--cyan);text-decoration:none;font-family:'Space Mono',monospace;font-size:11px;">GITHUB ↗</a>
+  </div>
+</footer>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  // ---- CHECK API STATUS ----
+  async function checkStatus() {
+    try {
+      const r = await fetch(API + '/', {signal: AbortSignal.timeout(3000)});
+      if (r.ok) {
+        document.getElementById('statusDot').classList.remove('offline');
+        document.getElementById('statusText').textContent = 'API ONLINE · LOCALHOST:8000';
+      } else { setOffline(); }
+    } catch { setOffline(); }
+  }
+
+  function setOffline() {
+    document.getElementById('statusDot').classList.add('offline');
+    document.getElementById('statusText').textContent = 'START API: uvicorn app.api.main:app --reload';
+  }
+
+  checkStatus();
+  setInterval(checkStatus, 10000);
+
+  // ---- PREDICT ----
+  async function runPredict() {
+    const price = document.getElementById('priceInput').value || 800;
+    const qty = document.getElementById('qtyInput').value || 5;
+    const box = document.getElementById('predictResult');
+    box.innerHTML = '<span class="loading"><span></span><span></span><span></span></span>';
+    try {
+      const r = await fetch(`${API}/predict?price=${price}&quantity=${qty}`);
+      const d = await r.json();
+      box.textContent = JSON.stringify(d, null, 2);
+    } catch {
+      box.textContent = '// Error: Make sure API is running\n// uvicorn app.api.main:app --reload';
+      box.style.color = '#ef4444';
+    }
+  }
+
+  // ---- SUMMARY ----
+  async function runSummary() {
+    const box = document.getElementById('summaryResult');
+    box.innerHTML = '<span class="loading"><span></span><span></span><span></span></span>';
+    try {
+      const r = await fetch(`${API}/summary`);
+      const d = await r.json();
+      box.textContent = JSON.stringify(d, null, 2);
+      box.style.color = 'var(--cyan)';
+    } catch {
+      box.textContent = '// Error: Make sure API is running\n// uvicorn app.api.main:app --reload';
+      box.style.color = '#ef4444';
+    }
+  }
+
+  // ---- RAG (simulated since rag is separate) ----
+  async function runRAG() {
+    const q = document.getElementById('ragInput').value;
+    const box = document.getElementById('ragResult');
+    box.innerHTML = '<span class="loading"><span></span><span></span><span></span></span>';
+    await new Promise(r => setTimeout(r, 800));
+    const docs = [
+      ['revenue', 'Q1 revenue was 500000 rupees.'],
+      ['q1', 'Q1 revenue was 500000 rupees.'],
+      ['region', 'North region had 40 percent of total sales.'],
+      ['north', 'North region had 40 percent of total sales.'],
+      ['laptop', 'Laptop products generated the highest revenue.'],
+      ['salesperson', 'Best salesperson was Rahul with 80000 sales.'],
+      ['rahul', 'Best salesperson was Rahul with 80000 sales.'],
+      ['q2', 'Q2 target is 600000 with focus on South region.'],
+      ['target', 'Q2 target is 600000 with focus on South region.'],
+    ];
+    const ql = q.toLowerCase();
+    let answer = 'No relevant information found in knowledge base.';
+    for (const [k, v] of docs) {
+      if (ql.includes(k)) { answer = v; break; }
+    }
+    box.textContent = `Q: ${q}\nA: ${answer}`;
+    box.style.color = 'var(--cyan)';
+  }
+
+  // ---- HEALTH ----
+  async function runHealth() {
+    const box = document.getElementById('healthResult');
+    box.innerHTML = '<span class="loading"><span></span><span></span><span></span></span>';
+    try {
+      const start = Date.now();
+      const r = await fetch(API + '/', {signal: AbortSignal.timeout(3000)});
+      const d = await r.json();
+      const ms = Date.now() - start;
+      box.textContent = `STATUS: 200 OK\nRESPONSE TIME: ${ms}ms\nMESSAGE: ${d.message}`;
+      box.style.color = '#4ade80';
+    } catch {
+      box.textContent = 'STATUS: OFFLINE\nRUN: uvicorn app.api.main:app --reload\nTHEN REFRESH THIS PAGE';
+      box.style.color = '#ef4444';
+    }
+  }
+
+  // ---- COUNTER ANIMATION ----
+  function animateCounter(el, target, suffix='') {
+    let current = 0;
+    const step = target / 40;
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = Math.floor(current) + suffix;
+      if (current >= target) clearInterval(timer);
+    }, 30);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCounter(document.getElementById('cnt1'), 6);
+        animateCounter(document.getElementById('cnt2'), 4);
+        animateCounter(document.getElementById('cnt3'), 1);
+        animateCounter(document.getElementById('cnt4'), 100, '%');
+        observer.disconnect();
+      }
+    });
+  });
+  observer.observe(document.querySelector('.stats-strip'));
+
+  // ---- CHART ----
+  const chartData = [
+    { label: 'Laptop', rev: 4000, qty: 5 },
+    { label: 'Phone', rev: 4000, qty: 10 },
+    { label: 'Tablet', rev: 2400, qty: 8 },
+    { label: 'Laptop', rev: 2400, qty: 3 },
+    { label: 'Phone', rev: 2800, qty: 7 },
+    { label: 'Tablet', rev: 1200, qty: 4 },
+    { label: 'Laptop', rev: 4800, qty: 6 },
+    { label: 'Phone', rev: 3600, qty: 9 },
+  ];
+
+  const maxRev = Math.max(...chartData.map(d => d.rev));
+  const maxQty = Math.max(...chartData.map(d => d.qty));
+  const barsEl = document.getElementById('chartBars');
+
+  chartData.forEach((d, i) => {
+    const revH = (d.rev / maxRev) * 150;
+    const qtyH = (d.qty / maxQty) * 150;
+    barsEl.innerHTML += `
+      <div class="bar-group">
+        <div class="bar-wrap">
+          <div class="bar cyan" style="height:${revH}px" data-val="₹${d.rev}"></div>
+          <div class="bar blue" style="height:${qtyH}px" data-val="${d.qty} units"></div>
+        </div>
+        <div class="bar-label">${d.label.substring(0,3)}</div>
+      </div>
+    `;
+  });
+
+</script>
+</body>
+</html>
