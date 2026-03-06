@@ -1,0 +1,9 @@
+date,product,price,quantity,region
+2024-01-01,Laptop,800,5,North
+2024-01-02,Phone,400,10,South
+2024-01-03,Tablet,300,8,North
+2024-01-04,Laptop,800,3,East
+2024-01-05,Phone,400,7,West
+2024-01-06,Tablet,300,4,South
+2024-01-07,Laptop,800,6,West
+2024-01-08,Phone,400,9,North
